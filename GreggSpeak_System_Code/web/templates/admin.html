@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+{% block admin_nav_active %}active{% endblock %}
+{% block current_role %}Admin{% endblock %}
+
+{% block content %}
+<section class="hero hero-admin">
+    <div class="hero-copy">
+        <p class="eyebrow">Admin Workspace</p>
+        <h1>Transcript Batch Management</h1>
+        <p class="subtle">Review saved transcript batches, edit page-level text, regenerate transcripts, and manage records for court-ready output.</p>
+    </div>
+
+    <div class="hero-card">
+        <span>System Status</span>
+        <strong>Backend Online</strong>
+        <p>{{ batches|length }} available batch{% if batches|length != 1 %}es{% endif %}</p>
+        {% if latest_batch %}
+        <div class="hero-meta">
+            <small>Latest</small>
+            <p>{{ latest_batch.title or latest_batch.batch_id }}</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="card">
+    <div class="section-head section-head-stack">
+        <div>
+            <p class="eyebrow">Saved Records</p>
+            <h2>All Batches</h2>
+        </div>
+        <div class="toolbar">
+            <input id="batchSearch" class="search-input" type="search" placeholder="Search by title or batch ID">
+        </div>
+    </div>
+
+    {% if batches %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Batch ID</th>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>Pages</th>
+                    <th>Confidence</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="batchTableBody">
+                {% for batch in batches %}
+                <tr data-search="{{ (batch.batch_id ~ ' ' ~ (batch.title or ''))|lower }}">
+                    <td><span class="mono-text">{{ batch.batch_id }}</span></td>
+                    <td>{{ batch.title or "Untitled Batch" }}</td>
+                    <td>{{ batch.created_at }}</td>
+                    <td>{{ batch.total_pages }}</td>
+                    <td>{{ "%.2f"|format(batch.confidence_avg or 0) }}</td>
+                    <td>
+                        <span class="status-tag {% if (batch.upload_status or '') == 'processed' %}processed{% else %}pending{% endif %}">
+                            {{ batch.upload_status or "pending" }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-row">
+                            <a class="btn primary small" href="{{ url_for('admin_batch_detail', batch_id=batch.batch_id) }}">View</a>
+                            <a class="btn secondary small" href="{{ url_for('admin_batch_detail', batch_id=batch.batch_id) }}#editor-panel">Edit</a>
+                            <form
+                                method="post"
+                                action="{{ url_for('admin_delete_batch', batch_id=batch.batch_id) }}"
+                                data-confirm-title="Delete Transcript?"
+                                data-confirm-message="Move this transcript batch to the trash bin?"
+                                data-confirm-button="Delete"
+                            >
+                                <button class="btn danger small" type="submit">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <p id="searchEmptyState" class="empty-state hidden">No batches match your search.</p>
+    {% else %}
+    <p class="empty-state">No transcript batches have been saved yet.</p>
+    {% endif %}
+</section>
+
+<section class="card">
+    <div class="section-head">
+        <div>
+            <p class="eyebrow">Trash Bin</p>
+            <h2>Deleted Transcripts</h2>
+        </div>
+        <span class="toolbar-count">{{ deleted_batches|length }} deleted</span>
+    </div>
+
+    {% if deleted_batches %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Batch ID</th>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>Pages</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for batch in deleted_batches %}
+                <tr>
+                    <td><span class="mono-text">{{ batch.batch_id }}</span></td>
+                    <td>{{ batch.title or "Untitled Batch" }}</td>
+                    <td>{{ batch.created_at }}</td>
+                    <td>{{ batch.total_pages }}</td>
+                    <td><span class="status-tag deleted">deleted</span></td>
+                    <td>
+                        <form
+                            method="post"
+                            action="{{ url_for('admin_restore_batch', batch_id=batch.batch_id) }}"
+                            data-confirm-title="Restore Transcript?"
+                            data-confirm-message="Restore this transcript batch from the trash bin?"
+                            data-confirm-button="Restore"
+                        >
+                            <button class="btn secondary small" type="submit">Restore</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty-state">No deleted transcripts in the trash bin.</p>
+    {% endif %}
+</section>
+
+<script>
+const batchSearchInput = document.getElementById("batchSearch");
+const batchRows = Array.from(document.querySelectorAll("#batchTableBody tr"));
+const searchEmptyState = document.getElementById("searchEmptyState");
+
+if (batchSearchInput) {
+    batchSearchInput.addEventListener("input", function () {
+        const query = this.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        batchRows.forEach((row) => {
+            const matches = row.dataset.search.includes(query);
+            row.style.display = matches ? "" : "none";
+            if (matches) {
+                visibleCount += 1;
+            }
+        });
+
+        if (searchEmptyState) {
+            searchEmptyState.classList.toggle("hidden", visibleCount !== 0);
+        }
+    });
+}
+</script>
+{% endblock %}

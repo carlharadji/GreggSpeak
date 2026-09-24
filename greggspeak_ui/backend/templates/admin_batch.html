@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Batch{% endblock %}
+{% block admin_nav_active %}active{% endblock %}
+{% block current_role %}Admin{% endblock %}
+
+{% block content %}
+<section class="hero hero-admin">
+    <div class="hero-copy">
+        <p class="eyebrow">Batch Editor</p>
+        <h1>{{ batch.title or "Untitled Batch" }}</h1>
+        <p class="subtle">Edit page text safely. Each save updates the page record and regenerates the transcript automatically.</p>
+    </div>
+    <div class="hero-card">
+        <span>Batch Summary</span>
+        <strong>{{ batch.total_pages }} page{% if batch.total_pages != 1 %}s{% endif %}</strong>
+        <p>Confidence {{ "%.2f"|format(batch.confidence_avg or 0) }}</p>
+    </div>
+</section>
+
+<section class="detail-shell">
+    <aside class="card sidebar-card">
+        <div class="section-head">
+            <h2>Pages</h2>
+            <div class="action-row">
+                <a class="btn primary small" href="{{ url_for('download_batch_pdf', batch_id=batch.batch_id) }}">Download PDF</a>
+                <a class="btn secondary small" href="{{ url_for('admin_dashboard') }}">Back</a>
+            </div>
+        </div>
+
+        <div class="meta-grid compact">
+            <div><span>Batch ID</span><strong>{{ batch.batch_id }}</strong></div>
+            <div><span>Filename</span><strong>{{ batch.filename or "-" }}</strong></div>
+            <div><span>Date</span><strong>{{ batch.created_at }}</strong></div>
+            <div><span>Status</span><strong>{{ batch.upload_status or "pending" }}</strong></div>
+        </div>
+
+        <nav class="page-list">
+            {% for page in pages %}
+            <a class="page-list-item {% if page.is_edited %}edited{% endif %}" href="#page-{{ page.page_number }}">
+                <span>Page {{ page.page_number }}</span>
+                {% if page.is_edited %}
+                <strong>Edited</strong>
+                {% else %}
+                <small>Original</small>
+                {% endif %}
+            </a>
+            {% endfor %}
+        </nav>
+
+        <div class="transcript-panel compact-panel">
+            <h3>Combined Transcript</h3>
+            <pre>{{ batch.transcript_text or "Transcript not generated yet." }}</pre>
+        </div>
+
+        <form
+            method="post"
+            action="{{ url_for('admin_delete_batch', batch_id=batch.batch_id) }}"
+            data-confirm-title="Delete Transcript?"
+            data-confirm-message="Move this transcript batch to the trash bin?"
+            data-confirm-button="Delete"
+        >
+            <button class="btn danger full-width" type="submit">Delete Batch</button>
+        </form>
+    </aside>
+
+    <section id="editor-panel" class="card editor-card">
+        <div class="section-head">
+            <div>
+                <p class="eyebrow">Page Editor</p>
+                <h2>Edit Transcript Pages</h2>
+            </div>
+            <div class="action-row">
+                <span class="toolbar-count">{{ pages|length }} page(s)</span>
+                <a class="btn primary small" href="{{ url_for('download_batch_pdf', batch_id=batch.batch_id) }}">Download PDF</a>
+            </div>
+        </div>
+
+        {% for page in pages %}
+        <article id="page-{{ page.page_number }}" class="page-editor {% if page.is_edited %}page-editor-edited{% endif %}">
+            <div class="page-meta">
+                <div>
+                    <strong>Page {{ page.page_number }}</strong>
+                    <p class="subtle">Confidence {{ "%.2f"|format(page.confidence or 0) }}</p>
+                </div>
+                {% if page.is_edited %}
+                <span class="edited-badge">Edited</span>
+                {% endif %}
+            </div>
+
+            <details class="raw-toggle">
+                <summary>Show Raw Text</summary>
+                <div class="raw-text-panel">
+                    <pre>{{ page.raw_text or "" }}</pre>
+                </div>
+            </details>
+
+            <form method="post" action="{{ url_for('admin_edit_page', page_id=page.page_id) }}">
+                <input type="hidden" name="batch_id" value="{{ batch.batch_id }}">
+                <label for="edited_text_{{ page.page_id }}">Edited Text</label>
+                <textarea id="edited_text_{{ page.page_id }}" name="edited_text">{{ page.edited_text or "" }}</textarea>
+
+                <div class="editor-actions">
+                    <button class="btn primary" type="submit">Save Page Update</button>
+                    <a class="btn secondary" href="#top">Top</a>
+                </div>
+            </form>
+            <form
+                class="editor-actions"
+                method="post"
+                action="{{ url_for('admin_delete_page', page_id=page.page_id) }}"
+                data-confirm-title="Delete Page?"
+                data-confirm-message="Permanently delete Page {{ page.page_number }} from this transcript batch? This cannot be undone."
+                data-confirm-button="Delete Page"
+            >
+                <input type="hidden" name="batch_id" value="{{ batch.batch_id }}">
+                <button class="btn danger" type="submit">Delete Page</button>
+            </form>
+        </article>
+        {% else %}
+        <p class="empty-state">No pages are attached to this batch yet.</p>
+        {% endfor %}
+    </section>
+</section>
+{% endblock %}

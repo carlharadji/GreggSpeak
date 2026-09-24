@@ -1,0 +1,383 @@
+{% extends "base.html" %}
+
+{% block title %}Transcript Workspace{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-copy">
+        <p class="eyebrow">Transcript Workspace</p>
+        <h1>{{ batch.title or "Untitled Batch" }}</h1>
+        <p class="subtle">Review, edit, and export this transcript batch from one stenographer-friendly workspace.</p>
+    </div>
+    <div class="hero-card">
+        <span>Batch Status</span>
+        <strong>{{ batch.upload_status or "pending" }}</strong>
+        <p>{{ batch.total_pages }} page(s)</p>
+    </div>
+</section>
+
+<section class="detail-shell user-detail-shell">
+    <article class="card transcript-reader-card">
+        <div class="section-head">
+            <div>
+                <p class="eyebrow">Transcript</p>
+                <h2>Combined Output</h2>
+            </div>
+            <div class="action-row">
+                <button
+                    id="ttsToggleButton"
+                    class="btn secondary small"
+                    type="button"
+                    data-state="stopped"
+                >
+                    Play Audio
+                </button>
+                <button
+                    class="btn secondary small"
+                    type="submit"
+                    form="tsnExportForm"
+                    formaction="{{ url_for('save_tsn_fields', batch_id=batch.batch_id) }}"
+                    formmethod="post"
+                    data-confirm-title="Save TSN Details?"
+                    data-confirm-message="Save these TSN front page and certification details for this transcript batch?"
+                    data-confirm-button="Save Details"
+                >Save TSN Details</button>
+                <button
+                    class="btn primary small"
+                    type="submit"
+                    form="tsnExportForm"
+                    name="export_format"
+                    value="pdf"
+                    data-confirm-title="Download PDF?"
+                    data-confirm-message="Generate and download the TSN PDF using the current transcript and TSN details?"
+                    data-confirm-button="Download PDF"
+                >Download PDF</button>
+                <button
+                    class="btn secondary small"
+                    type="submit"
+                    form="tsnExportForm"
+                    name="export_format"
+                    value="docx"
+                    data-confirm-title="Download Word?"
+                    data-confirm-message="Generate and download the editable Word TSN using the current transcript and TSN details?"
+                    data-confirm-button="Download Word"
+                >Download Word</button>
+                <form
+                    method="post"
+                    action="{{ url_for('add_pages_to_batch', batch_id=batch.batch_id) }}"
+                    data-confirm-title="Add Pages?"
+                    data-confirm-message="The next pages scanned in the desktop app will be appended to this transcript batch."
+                    data-confirm-button="Add Pages"
+                >
+                    <button class="btn secondary small" type="submit">Add Pages</button>
+                </form>
+                <a class="btn workspace-back-btn small" href="{{ url_for('user_dashboard') }}">Back</a>
+            </div>
+        </div>
+        <div class="meta-grid compact">
+            <div><span>Batch ID</span><strong>{{ batch.batch_id }}</strong></div>
+            <div><span>Date</span><strong>{{ batch.created_at }}</strong></div>
+            <div><span>Pages</span><strong>{{ batch.total_pages }}</strong></div>
+            <div><span>Confidence</span><strong>{{ "%.2f"|format(batch.confidence_avg or 0) }}</strong></div>
+        </div>
+
+        <form id="tsnExportForm" class="tsn-export-form" method="post" action="{{ url_for('download_batch_pdf', batch_id=batch.batch_id) }}">
+            <div class="section-head compact-head">
+                <div>
+                    <p class="eyebrow">TSN Export Fields</p>
+                    <h2>Front And Certification Pages</h2>
+                </div>
+                <span class="toolbar-count">Manual fields for export</span>
+            </div>
+
+            <div class="tsn-scroll-panel">
+                <div class="tsn-form-section">
+                    <h3>Header / Contact</h3>
+                    <div class="tsn-field-grid">
+                        <label>Header Line 1<input name="header_line_1" value="{{ tsn_fields.header_line_1 }}"></label>
+                        <label>Header Line 2<input name="header_line_2" value="{{ tsn_fields.header_line_2 }}"></label>
+                        <label>Header Line 3<input name="header_line_3" value="{{ tsn_fields.header_line_3 }}"></label>
+                        <label>Header Line 4<input name="header_line_4" value="{{ tsn_fields.header_line_4 }}"></label>
+                        <label>Email Add<input name="email" value="{{ tsn_fields.email }}"></label>
+                        <label>Mobile Number<input name="mobile" value="{{ tsn_fields.mobile }}"></label>
+                    </div>
+                </div>
+
+                <div class="tsn-form-section">
+                    <h3>Case Details</h3>
+                    <div class="tsn-field-grid">
+                        <label>Complainant / Plaintiff<input name="complainant" value="{{ tsn_fields.complainant }}"></label>
+                        <label class="criminal-case-field">Criminal Case No.
+                            <input
+                                id="criminalCaseNoInput"
+                                name="criminal_case_no"
+                                value="{{ tsn_fields.criminal_case_no }}"
+                                data-check-url="{{ url_for('api_tsn_criminal_case_check') }}"
+                                data-batch-id="{{ batch.batch_id }}"
+                                autocomplete="off"
+                            >
+                            <span id="criminalCaseWarning" class="field-warning {% if not criminal_case_matches %}hidden{% endif %}">
+                                {% if criminal_case_matches %}
+                                Similar case found: {{ criminal_case_matches[0].criminal_case_no }} ({{ criminal_case_matches[0].title }})
+                                {% endif %}
+                            </span>
+                        </label>
+                        <label>For<input name="case_for" value="{{ tsn_fields.case_for }}"></label>
+                        <label>Accused<input name="accused" value="{{ tsn_fields.accused }}"></label>
+                        <label>Proceeding<input name="proceeding" value="{{ tsn_fields.proceeding }}" placeholder="e.g. hearing"></label>
+                        <label>Hearing Date<input type="date" name="hearing_date" value="{{ tsn_fields.hearing_date }}"></label>
+                        <label>Hearing Time<input type="time" name="hearing_time" value="{{ tsn_fields.hearing_time }}"></label>
+                        <label>Time Period
+                            <select name="hearing_period">
+                                <option value="morning" {% if tsn_fields.hearing_period == "morning" %}selected{% endif %}>Morning</option>
+                                <option value="afternoon" {% if tsn_fields.hearing_period == "afternoon" %}selected{% endif %}>Afternoon</option>
+                                <option value="evening" {% if tsn_fields.hearing_period == "evening" %}selected{% endif %}>Evening</option>
+                            </select>
+                        </label>
+                        <label>Place<input name="place" value="{{ tsn_fields.place }}"></label>
+                        <label>Presiding Judge<input name="judge_name" value="{{ tsn_fields.judge_name }}"></label>
+                    </div>
+                </div>
+
+                <div class="tsn-form-section">
+                    <h3>Appearances / Present</h3>
+                    <div class="tsn-field-grid">
+                        <label>Public Prosecutor<input name="public_prosecutor" value="{{ tsn_fields.public_prosecutor }}"></label>
+                        <label>Counsel for the Accused<input name="defense_counsel" value="{{ tsn_fields.defense_counsel }}"></label>
+                        <label>Court Interpreter<input name="court_interpreter" value="{{ tsn_fields.court_interpreter }}"></label>
+                        <label>Court Stenographer<input name="court_stenographer" value="{{ tsn_fields.court_stenographer }}"></label>
+                        <label>Certifier Name<input name="certifier_name" value="{{ tsn_fields.certifier_name }}"></label>
+                    </div>
+                    <label class="tsn-wide-field">Final Court Order / Notes
+                        <textarea name="order_text" placeholder="Optional text after COURT: Order.">{{ tsn_fields.order_text }}</textarea>
+                    </label>
+                </div>
+            </div>
+
+            <div class="editor-actions">
+                <button
+                    class="btn secondary"
+                    type="submit"
+                    formaction="{{ url_for('save_tsn_fields', batch_id=batch.batch_id) }}"
+                    formmethod="post"
+                    data-confirm-title="Save TSN Details?"
+                    data-confirm-message="Save these TSN front page and certification details for this transcript batch?"
+                    data-confirm-button="Save Details"
+                >Save TSN Details</button>
+                <button
+                    class="btn primary"
+                    type="submit"
+                    name="export_format"
+                    value="pdf"
+                    data-confirm-title="Download TSN PDF?"
+                    data-confirm-message="Generate and download the TSN PDF using the current transcript and TSN details?"
+                    data-confirm-button="Download PDF"
+                >Download TSN PDF</button>
+                <button
+                    class="btn secondary"
+                    type="submit"
+                    name="export_format"
+                    value="docx"
+                    data-confirm-title="Download Editable Word?"
+                    data-confirm-message="Generate and download the editable Word TSN using the current transcript and TSN details?"
+                    data-confirm-button="Download Word"
+                >Download Editable Word</button>
+            </div>
+        </form>
+
+        <div class="section-head transcript-output-head">
+            <div>
+                <p class="eyebrow">Recognized Transcript</p>
+                <h2>TSN Body</h2>
+            </div>
+        </div>
+        <div class="transcript-panel transcript-reader">
+            <pre>{{ batch.transcript_text or "Transcript not generated yet." }}</pre>
+        </div>
+    </article>
+
+    <aside class="card">
+        <div class="section-head">
+            <h2>Editable Pages</h2>
+            <div class="action-row">
+                <span class="toolbar-count">{{ pages|length }} page(s)</span>
+                <form
+                    method="post"
+                    action="{{ url_for('unified_delete_batch', batch_id=batch.batch_id) }}"
+                    data-confirm-title="Delete Transcript?"
+                    data-confirm-message="Move this transcript batch to the trash bin?"
+                    data-confirm-button="Delete"
+                >
+                    <button class="btn danger small" type="submit">Delete Batch</button>
+                </form>
+            </div>
+        </div>
+        <div class="page-view-list">
+            {% for page in pages %}
+            <article class="page-view user-edit-card {% if page.is_edited %}page-editor-edited{% endif %}">
+                <div class="page-meta">
+                    <strong>Page {{ page.page_number }}</strong>
+                    <span>Confidence {{ "%.2f"|format(page.confidence or 0) }}</span>
+                </div>
+                <div class="review-metrics">
+                    <span>Rows {{ page.rows_detected or 0 }}</span>
+                    <span>Words {{ page.words_detected or 0 }}</span>
+                    <span>Review Words {{ page.low_confidence_words or 0 }}</span>
+                </div>
+                {% if page.is_edited %}
+                <span class="edited-badge">Edited</span>
+                {% endif %}
+                {% if page.review_notes or (page.low_confidence_words or 0) > 0 or (page.confidence or 0) < 70 %}
+                <div class="review-alert">
+                    <strong>Review Suggested</strong>
+                    <span>{{ page.review_notes or "Page confidence is below the review threshold." }}</span>
+                </div>
+                {% endif %}
+                {% if page.image_path or page.segmentation_image_path %}
+                <div class="segmentation-review-grid">
+                    {% if page.image_path %}
+                    <figure class="segmentation-review-panel">
+                        <figcaption>Scanned Page</figcaption>
+                        <a href="{{ url_for('page_artifact', artifact_path=page.image_path) }}" target="_blank" rel="noopener">
+                            <img src="{{ url_for('page_artifact', artifact_path=page.image_path) }}" alt="Scanned page {{ page.page_number }}">
+                        </a>
+                    </figure>
+                    {% endif %}
+                    {% if page.segmentation_image_path %}
+                    <figure class="segmentation-review-panel">
+                        <figcaption>Segmentation Review</figcaption>
+                        <a href="{{ url_for('page_artifact', artifact_path=page.segmentation_image_path) }}" target="_blank" rel="noopener">
+                            <img src="{{ url_for('page_artifact', artifact_path=page.segmentation_image_path) }}" alt="Segmented page {{ page.page_number }}">
+                        </a>
+                    </figure>
+                    {% endif %}
+                </div>
+                {% endif %}
+                <form
+                    method="post"
+                    action="{{ url_for('user_edit_page', page_id=page.page_id) }}"
+                    data-confirm-title="Save Page Changes?"
+                    data-confirm-message="Save edits for Page {{ page.page_number }} and regenerate the combined transcript?"
+                    data-confirm-button="Save Changes"
+                >
+                    <input type="hidden" name="batch_id" value="{{ batch.batch_id }}">
+                    <label for="user_edited_text_{{ page.page_id }}">Transcript Text</label>
+                    <textarea id="user_edited_text_{{ page.page_id }}" name="edited_text">{{ page.edited_text or page.raw_text or "" }}</textarea>
+                    <div class="editor-actions">
+                        <button class="btn primary" type="submit">Save Changes</button>
+                    </div>
+                </form>
+                <form
+                    class="editor-actions"
+                    method="post"
+                    action="{{ url_for('user_delete_page', page_id=page.page_id) }}"
+                    data-confirm-title="Delete Page?"
+                    data-confirm-message="Permanently delete Page {{ page.page_number }} from this transcript batch? This cannot be undone."
+                    data-confirm-button="Delete Page"
+                >
+                    <input type="hidden" name="batch_id" value="{{ batch.batch_id }}">
+                    <button class="btn danger" type="submit">Delete Page</button>
+                </form>
+            </article>
+            {% else %}
+            <p class="empty-state">No saved pages are available for this batch.</p>
+            {% endfor %}
+        </div>
+    </aside>
+</section>
+
+<script>
+(() => {
+    const toggleButton = document.getElementById("ttsToggleButton");
+    const transcriptText = {{ (batch.transcript_text or "Transcript not generated yet.")|tojson }};
+
+    if (!toggleButton) return;
+
+    if (!("speechSynthesis" in window)) {
+        toggleButton.disabled = true;
+        toggleButton.textContent = "Audio Unavailable";
+        return;
+    }
+
+    function stopSpeech() {
+        window.speechSynthesis.cancel();
+        toggleButton.dataset.state = "stopped";
+        toggleButton.textContent = "Play Audio";
+    }
+
+    toggleButton.addEventListener("click", () => {
+        if (toggleButton.dataset.state === "playing") {
+            stopSpeech();
+            return;
+        }
+
+        stopSpeech();
+        const utterance = new SpeechSynthesisUtterance(transcriptText);
+        utterance.rate = 0.95;
+        utterance.pitch = 1;
+        utterance.onend = stopSpeech;
+        utterance.onerror = stopSpeech;
+
+        toggleButton.dataset.state = "playing";
+        toggleButton.textContent = "Stop Audio";
+        window.speechSynthesis.speak(utterance);
+    });
+
+    window.addEventListener("beforeunload", stopSpeech);
+})();
+
+(() => {
+    const input = document.getElementById("criminalCaseNoInput");
+    const warning = document.getElementById("criminalCaseWarning");
+
+    if (!input || !warning) return;
+
+    const checkUrl = input.dataset.checkUrl;
+    const batchId = input.dataset.batchId || "";
+    let debounceTimer = null;
+    let activeRequestId = 0;
+
+    function hideWarning() {
+        warning.textContent = "";
+        warning.classList.add("hidden");
+    }
+
+    function showWarning(match) {
+        warning.textContent = `Similar case found: ${match.criminal_case_no} (${match.title})`;
+        warning.classList.remove("hidden");
+    }
+
+    input.addEventListener("input", () => {
+        const value = input.value.trim();
+        window.clearTimeout(debounceTimer);
+
+        if (value.length < 3 || value === "0000") {
+            hideWarning();
+            return;
+        }
+
+        debounceTimer = window.setTimeout(async () => {
+            const requestId = ++activeRequestId;
+            const params = new URLSearchParams({ case_no: value, batch_id: batchId });
+
+            try {
+                const response = await fetch(`${checkUrl}?${params.toString()}`, {
+                    headers: { "Accept": "application/json" },
+                });
+                const payload = await response.json();
+                if (requestId !== activeRequestId) return;
+
+                const match = payload.matches && payload.matches[0];
+                if (match) {
+                    showWarning(match);
+                } else {
+                    hideWarning();
+                }
+            } catch (error) {
+                hideWarning();
+            }
+        }, 350);
+    });
+})();
+</script>
+{% endblock %}

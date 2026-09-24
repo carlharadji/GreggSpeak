@@ -1,0 +1,22 @@
+{
+  "image_width": 1232,
+  "image_height": 1640,
+  "corners": {
+    "top_left": [
+      174,
+      111
+    ],
+    "top_right": [
+      1063,
+      119
+    ],
+    "bottom_right": [
+      1055,
+      1311
+    ],
+    "bottom_left": [
+      174,
+      1308
+    ]
+  }
+}

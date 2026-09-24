@@ -1,0 +1,9 @@
+customtkinter
+Flask>=2.3.3,<3
+Werkzeug>=2.3.7,<3
+numpy
+opencv-python
+pillow
+qrcode[pil]
+tensorflow
+pyttsx3

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Account{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-copy">
+        <p class="eyebrow">Account</p>
+        <h1>Stenographer Profile</h1>
+        <p class="subtle">Overview of your current workspace role, access scope, and activity summary inside the GreggSpeak web app.</p>
+    </div>
+    <div class="hero-card">
+        <span>Access Level</span>
+        <strong>Authorized Stenographer</strong>
+        <p>Full transcript review, editing, restore, and export access.</p>
+    </div>
+</section>
+
+<section class="detail-shell account-shell">
+    <article class="card">
+        <div class="section-head">
+            <div>
+                <p class="eyebrow">Profile Summary</p>
+                <h2>Current Session</h2>
+            </div>
+        </div>
+        <div class="meta-grid">
+            <div><span>Role</span><strong>Stenographer</strong></div>
+            <div><span>Status</span><strong>Active</strong></div>
+            <div><span>Active Batches</span><strong>{{ total_batches }}</strong></div>
+            <div><span>Deleted Batches</span><strong>{{ deleted_batches }}</strong></div>
+        </div>
+    </article>
+
+    <article class="card">
+        <div class="section-head">
+            <div>
+                <p class="eyebrow">Recent Activity</p>
+                <h2>Latest Transcript</h2>
+            </div>
+        </div>
+        {% if latest_batch %}
+        <div class="meta-grid compact">
+            <div><span>Title</span><strong>{{ latest_batch.title or "Untitled Batch" }}</strong></div>
+            <div><span>Batch ID</span><strong>{{ latest_batch.batch_id }}</strong></div>
+            <div><span>Date</span><strong>{{ latest_batch.created_at }}</strong></div>
+            <div><span>Pages</span><strong>{{ latest_batch.total_pages }}</strong></div>
+        </div>
+        <div class="action-row">
+            <a class="btn primary" href="{{ url_for('user_batch_detail', batch_id=latest_batch.batch_id) }}">Open Workspace</a>
+            <a class="btn secondary" href="{{ url_for('download_batch_pdf', batch_id=latest_batch.batch_id) }}">Download PDF</a>
+        </div>
+        {% else %}
+        <p class="empty-state">No transcript activity yet. Save a batch from the CTk application to begin.</p>
+        {% endif %}
+    </article>
+</section>
+{% endblock %}

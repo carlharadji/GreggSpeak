@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Login | GreggSpeak{% endblock %}
+
+{% block content %}
+<section class="login-shell">
+    <article class="login-card">
+        <div class="login-copy">
+            <p class="eyebrow">Secure Workspace</p>
+            <h1>Sign in to GreggSpeak</h1>
+            <p class="subtle">Access transcript records, TSN exports, review images, and saved shorthand batches.</p>
+        </div>
+
+        <form class="login-form" method="post" action="{{ url_for('login_page') }}">
+            <input type="hidden" name="next" value="{{ next_url }}">
+
+            <label for="username">Username</label>
+            <input id="username" name="username" type="text" autocomplete="username" required autofocus>
+
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" required>
+
+            <button class="btn primary full-width" type="submit">Sign In</button>
+        </form>
+    </article>
+</section>
+{% endblock %}

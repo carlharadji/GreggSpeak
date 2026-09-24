@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}GreggSpeak Web{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='gs-logo.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=mobile-nav-20260513b">
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand-wrap" href="{{ url_for('user_dashboard') if is_authenticated else url_for('login_page') }}">
+            <div class="brand-row">
+                <img class="brand-logo" src="{{ url_for('static', filename='gs-logo.svg') }}" alt="" aria-hidden="true">
+                <div class="brand-lockup">
+                    <span class="brand-mark">GREGG</span><span class="brand-name">SPEAK</span>
+                </div>
+            </div>
+            <span class="brand-subtitle">Vision-Based Translator and Reader for Gregg Shorthand</span>
+        </a>
+
+        {% if is_authenticated %}
+        <button
+            id="mobileMenuButton"
+            class="mobile-menu-button"
+            type="button"
+            aria-label="Open navigation menu"
+            aria-expanded="false"
+            aria-controls="primaryNav"
+        >
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </button>
+
+        <nav id="primaryNav" class="navlinks">
+            <a class="navlink {% if request.endpoint in ['index', 'user_dashboard', 'stenographer_dashboard'] %}active{% endif %}" href="{{ url_for('user_dashboard') }}">Home</a>
+            <a class="navlink {% if request.endpoint == 'records_page' %}active{% endif %}" href="{{ url_for('records_page') }}">Records</a>
+            <a class="navlink {% if request.endpoint == 'trash_page' %}active{% endif %}" href="{{ url_for('trash_page') }}">Trash</a>
+            <a class="navlink mobile-nav-only {% if request.endpoint == 'account_page' %}active{% endif %}" href="{{ url_for('account_page') }}">Profile</a>
+            <a class="navlink mobile-nav-only {% if request.endpoint == 'settings_page' %}active{% endif %}" href="{{ url_for('settings_page') }}">Settings</a>
+            <a class="navlink mobile-nav-only danger-link" href="{{ url_for('logout_page') }}">Logout</a>
+        </nav>
+        {% endif %}
+
+        {% if is_authenticated %}
+        <div class="topbar-tools">
+            <div class="profile-menu">
+                <button
+                    id="profileMenuButton"
+                    class="profile-button"
+                    type="button"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    aria-controls="profileMenuList"
+                >
+                    <span class="profile-avatar">{{ (current_username or "User")[0:1]|upper }}</span>
+                </button>
+                <div id="profileMenuList" class="profile-dropdown hidden" role="menu">
+                    <a class="profile-link {% if request.endpoint == 'account_page' %}active{% endif %}" href="{{ url_for('account_page') }}" role="menuitem">Profile</a>
+                    <a class="profile-link {% if request.endpoint == 'settings_page' %}active{% endif %}" href="{{ url_for('settings_page') }}" role="menuitem">Settings</a>
+                    <a class="profile-link danger-link" href="{{ url_for('logout_page') }}" role="menuitem">Logout</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </header>
+
+    <main class="page-shell">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <section class="flash-stack" aria-live="polite" aria-atomic="true">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}" role="status">{{ message }}</div>
+                    {% endfor %}
+                </section>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <div id="confirmModal" class="confirm-modal hidden" aria-hidden="true">
+        <div class="confirm-backdrop" data-confirm-close></div>
+        <div class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+            <p class="eyebrow">Confirmation</p>
+            <h2 id="confirmTitle">Are you sure?</h2>
+            <p id="confirmMessage" class="subtle">Please confirm this action.</p>
+            <div class="confirm-actions">
+                <button id="confirmSubmitButton" class="btn danger" type="button">Confirm</button>
+                <button id="confirmCancelButton" class="btn secondary" type="button">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (() => {
+        const modal = document.getElementById("confirmModal");
+        const confirmTitle = document.getElementById("confirmTitle");
+        const confirmMessage = document.getElementById("confirmMessage");
+        const confirmSubmitButton = document.getElementById("confirmSubmitButton");
+        const confirmCancelButton = document.getElementById("confirmCancelButton");
+        let activeForm = null;
+        let activeSubmitter = null;
+        let activeUrl = null;
+
+        function closeModal() {
+            if (!modal) return;
+            modal.classList.add("hidden");
+            modal.setAttribute("aria-hidden", "true");
+            activeForm = null;
+            activeSubmitter = null;
+            activeUrl = null;
+        }
+
+        function openModal(source, form = null, submitter = null) {
+            if (!modal || !source) return;
+            activeForm = form;
+            activeSubmitter = submitter;
+            activeUrl = source.href || null;
+            confirmTitle.textContent = source.dataset.confirmTitle || "Are you sure?";
+            confirmMessage.textContent = source.dataset.confirmMessage || "Please confirm this action.";
+            confirmSubmitButton.textContent = source.dataset.confirmButton || "Confirm";
+            modal.classList.remove("hidden");
+            modal.setAttribute("aria-hidden", "false");
+        }
+
+        document.querySelectorAll("form[data-confirm-message]").forEach((form) => {
+            form.addEventListener("submit", (event) => {
+                if (form.dataset.confirmed === "true") {
+                    form.dataset.confirmed = "false";
+                    return;
+                }
+                event.preventDefault();
+                openModal(form, form, event.submitter || null);
+            });
+        });
+
+        document.querySelectorAll("button[data-confirm-message]").forEach((button) => {
+            const form = button.form;
+            if (!form || form.dataset.confirmMessage) return;
+            form.addEventListener("submit", (event) => {
+                if (event.submitter !== button) return;
+                if (form.dataset.confirmed === "true") {
+                    form.dataset.confirmed = "false";
+                    return;
+                }
+                event.preventDefault();
+                openModal(button, form, button);
+            });
+        });
+
+        document.querySelectorAll("a[data-confirm-message]").forEach((link) => {
+            link.addEventListener("click", (event) => {
+                event.preventDefault();
+                openModal(link);
+            });
+        });
+
+        if (confirmSubmitButton) {
+            confirmSubmitButton.addEventListener("click", () => {
+                if (!activeForm && !activeUrl) return;
+                const formToSubmit = activeForm;
+                const submitter = activeSubmitter;
+                const urlToOpen = activeUrl;
+                closeModal();
+                if (urlToOpen) {
+                    window.location.href = urlToOpen;
+                    return;
+                }
+                formToSubmit.dataset.confirmed = "true";
+                if (submitter && typeof formToSubmit.requestSubmit === "function") {
+                    formToSubmit.requestSubmit(submitter);
+                } else {
+                    formToSubmit.submit();
+                }
+            });
+        }
+
+        if (confirmCancelButton) {
+            confirmCancelButton.addEventListener("click", closeModal);
+        }
+
+        document.querySelectorAll("[data-confirm-close]").forEach((element) => {
+            element.addEventListener("click", closeModal);
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                closeModal();
+                closeMobileMenu();
+            }
+        });
+
+        const profileMenuButton = document.getElementById("profileMenuButton");
+        const profileMenuList = document.getElementById("profileMenuList");
+
+        function closeProfileMenu() {
+            if (!profileMenuButton || !profileMenuList) return;
+            profileMenuList.classList.add("hidden");
+            profileMenuButton.setAttribute("aria-expanded", "false");
+        }
+
+        function openProfileMenu() {
+            if (!profileMenuButton || !profileMenuList) return;
+            profileMenuList.classList.remove("hidden");
+            profileMenuButton.setAttribute("aria-expanded", "true");
+        }
+
+        if (profileMenuButton && profileMenuList) {
+            profileMenuButton.addEventListener("click", (event) => {
+                event.stopPropagation();
+                const isHidden = profileMenuList.classList.contains("hidden");
+                if (isHidden) {
+                    openProfileMenu();
+                } else {
+                    closeProfileMenu();
+                }
+            });
+
+            profileMenuList.addEventListener("click", (event) => {
+                event.stopPropagation();
+            });
+
+            document.addEventListener("click", closeProfileMenu);
+        }
+
+        const mobileMenuButton = document.getElementById("mobileMenuButton");
+        const primaryNav = document.getElementById("primaryNav");
+
+        function closeMobileMenu() {
+            if (!mobileMenuButton || !primaryNav) return;
+            primaryNav.classList.remove("is-open");
+            mobileMenuButton.classList.remove("is-open");
+            mobileMenuButton.setAttribute("aria-expanded", "false");
+            mobileMenuButton.setAttribute("aria-label", "Open navigation menu");
+        }
+
+        function openMobileMenu() {
+            if (!mobileMenuButton || !primaryNav) return;
+            primaryNav.classList.add("is-open");
+            mobileMenuButton.classList.add("is-open");
+            mobileMenuButton.setAttribute("aria-expanded", "true");
+            mobileMenuButton.setAttribute("aria-label", "Close navigation menu");
+        }
+
+        if (mobileMenuButton && primaryNav) {
+            mobileMenuButton.addEventListener("click", (event) => {
+                event.stopPropagation();
+                if (primaryNav.classList.contains("is-open")) {
+                    closeMobileMenu();
+                } else {
+                    openMobileMenu();
+                    closeProfileMenu();
+                }
+            });
+
+            primaryNav.addEventListener("click", (event) => {
+                event.stopPropagation();
+                if (event.target.closest("a")) {
+                    closeMobileMenu();
+                }
+            });
+
+            document.addEventListener("click", closeMobileMenu);
+            window.addEventListener("resize", () => {
+                if (window.innerWidth > 860) {
+                    closeMobileMenu();
+                }
+            });
+        }
+
+        function getFlashStack() {
+            let stack = document.querySelector(".flash-stack");
+            if (!stack) {
+                stack = document.createElement("section");
+                stack.className = "flash-stack";
+                stack.setAttribute("aria-live", "polite");
+                stack.setAttribute("aria-atomic", "true");
+                document.body.appendChild(stack);
+            }
+            return stack;
+        }
+
+        function dismissFlash(flash, delay = 3000) {
+            setTimeout(() => {
+                flash.classList.add("flash-fade");
+                setTimeout(() => {
+                    flash.remove();
+                }, 300);
+            }, delay);
+        }
+
+        function showToast(message, category = "success") {
+            const flash = document.createElement("div");
+            flash.className = `flash ${category}`;
+            flash.setAttribute("role", "status");
+            flash.textContent = message;
+            getFlashStack().appendChild(flash);
+            dismissFlash(flash);
+        }
+
+        window.greggspeakToast = showToast;
+
+        const flashMessages = Array.from(document.querySelectorAll(".flash"));
+        flashMessages.forEach((flash) => {
+            dismissFlash(flash);
+        });
+
+        document.querySelectorAll("[data-copy-target]").forEach((button) => {
+            button.addEventListener("click", async () => {
+                const input = document.getElementById(button.dataset.copyTarget);
+                if (!input) return;
+                const text = input.value || input.textContent || "";
+                try {
+                    await navigator.clipboard.writeText(text);
+                    button.textContent = "Copied";
+                    showToast("Link copied.", "success");
+                } catch (error) {
+                    input.select();
+                    document.execCommand("copy");
+                    button.textContent = "Copied";
+                    showToast("Link copied.", "success");
+                }
+                setTimeout(() => {
+                    button.textContent = "Copy Link";
+                }, 1500);
+            });
+        });
+    })();
+    </script>
+</body>
+</html>

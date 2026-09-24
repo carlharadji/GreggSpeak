@@ -1,0 +1,129 @@
+# Public-release boundary. Keep research and runtime files on this computer.
+# Review consent, provenance, and redistribution rights before adding exceptions.
+/datasets/
+/data/
+**/data/
+/reports/
+/outputs/
+/weekly_journal/
+
+# Personal, historical dataset operations with machine-specific paths.
+/augment_51_to_100.py
+/augment_dataset.py
+/build_all_words_copy.py
+/create_internal_test_folder.py
+/make_uniform_testing_images.py
+/organize_dataset.py
+/remove_unwanted_words.py
+/reverse_augmentation.py
+/tools/build_appendix_a_docx.py
+/PROJECT_STRUCTURE.md
+
+# Manuals contain embedded images; docs also contains a browser profile.
+# Publish only separately reviewed documentation/screenshots in a future change.
+/docs/
+**/chrome-*-profile/
+**/*_lo_profile/
+
+# Deployment snapshots, patch workspaces, and archives duplicate private data.
+/_submission_package/
+/greggspeak_deployment_package_*/
+/GreggSpeak_System_Code/greggspeak_rpi_deploy/
+/rpi_patch_work/
+/rpi_live_patch_work/
+**/models/backup_*/
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.rar
+
+# Weights/checkpoints: distribute approved model versions separately.
+# Small label files remain reviewable; they are not proof of data ownership.
+*.keras
+*.h5
+*.hdf5
+*.tflite
+*.pb
+*.onnx
+*.ckpt*
+*.weights.*
+*.data-?????-of-?????
+checkpoint
+saved_model/
+checkpoints/
+
+# Local data and exports, including SQLite journal/WAL sidecars.
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.pdf
+*.docx
+*.doc
+page_captures/
+page_artifacts/
+transcripts/
+exports/
+
+# Credentials and machine-specific environment files.
+.env
+.env.*
+!.env.example
+!.env.template
+.envrc
+.netrc
+.npmrc
+.pypirc
+credentials*.json
+secrets*.json
+service-account*.json
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+
+# Python/JavaScript environments, caches, builds, and experiment output.
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+node_modules/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+.ipynb_checkpoints/
+*.egg-info/
+build/
+dist/
+.coverage*
+htmlcov/
+wandb/
+mlruns/
+logs/
+events.out.tfevents.*
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+~$*
+
+# Local IDE, OS, and agent tooling.
+.vs/
+.vscode/
+.idea/
+.codex/
+.agents/
+.claude/
+.DS_Store
+Thumbs.db
+Desktop.ini

@@ -1,0 +1,10 @@
+# OpenCV and Picamera2 are installed through apt on Raspberry Pi OS.
+numpy
+Pillow
+tflite-runtime
+Flask>=2.3.3,<3
+Werkzeug>=2.3.7,<3
+pyttsx3
+qrcode[pil]
+customtkinter
+pyserial

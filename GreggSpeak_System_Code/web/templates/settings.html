@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-copy">
+        <p class="eyebrow">Settings</p>
+        <h1>Workspace Configuration</h1>
+        <p class="subtle">Reference information for the current local deployment, database location, and transcript service status.</p>
+    </div>
+    <div class="hero-card">
+        <span>Web Service</span>
+        <strong>Local Deployment</strong>
+        <p>{{ primary_access_url }}</p>
+    </div>
+</section>
+
+<section class="detail-shell account-shell">
+    <article class="card">
+        <div class="section-head">
+            <div>
+                <p class="eyebrow">System</p>
+                <h2>Service Information</h2>
+            </div>
+        </div>
+        <div class="meta-grid">
+            <div><span>Database Path</span><strong>{{ database_path }}</strong></div>
+            <div><span>Latest Batch ID</span><strong>{{ latest_batch_id or "No batch yet" }}</strong></div>
+            <div><span>Active Batches</span><strong>{{ total_batches }}</strong></div>
+            <div><span>Trash Items</span><strong>{{ deleted_batches }}</strong></div>
+        </div>
+    </article>
+
+    <article class="card">
+        <div class="section-head">
+            <div>
+                <p class="eyebrow">Network</p>
+                <h2>Current Access Link</h2>
+            </div>
+        </div>
+        <div class="access-grid settings-access-grid">
+            <div class="access-main">
+                <label for="settingsAccessUrl">Primary URL</label>
+                <div class="copy-row">
+                    <input id="settingsAccessUrl" class="search-input" type="text" value="{{ primary_access_url }}" readonly>
+                    <button class="btn primary small" type="button" data-copy-target="settingsAccessUrl">Copy Link</button>
+                </div>
+            </div>
+            <div class="qr-card">
+                <img src="{{ url_for('access_qr_png') }}" alt="QR code for {{ primary_access_url }}">
+                <span>Scan from a device connected to the same network.</span>
+            </div>
+        </div>
+    </article>
+
+    <article class="card">
+        <div class="section-head">
+            <div>
+                <p class="eyebrow">Usage Notes</p>
+                <h2>Current Workspace Setup</h2>
+            </div>
+        </div>
+        <div class="transcript-panel compact-panel">
+            <pre>1. The web app is served locally alongside the CTk desktop interface.
+2. Transcript batches are stored in the local SQLite database.
+3. Delete actions move batches into the trash bin and can be restored.
+4. PDF export and browser text-to-speech are available from the transcript workspace.</pre>
+        </div>
+    </article>
+</section>
+{% endblock %}

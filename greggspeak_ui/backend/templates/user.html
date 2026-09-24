@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}Stenographer Dashboard{% endblock %}
+
+{% block content %}
+{% set current_mode = page_mode or "home" %}
+<section class="hero">
+    <div class="hero-copy">
+        {% if current_mode == "home" %}
+        <p class="eyebrow">Stenographer Workspace</p>
+        <h1>Latest Transcript Overview</h1>
+        <p class="subtle">Review the most recent LCD transcript, reopen the current workspace quickly, and monitor the transcript archive at a glance.</p>
+        {% elif current_mode == "records" %}
+        <p class="eyebrow">Transcript Archive</p>
+        <h1>Saved Transcript Records</h1>
+        <p class="subtle">Browse all active transcript batches, search by title or batch ID, reopen any saved workspace, and export records as needed.</p>
+        {% else %}
+        <p class="eyebrow">Archive Recovery</p>
+        <h1>Deleted Transcript Records</h1>
+        <p class="subtle">Review transcript batches that were removed from the active archive and restore them when needed.</p>
+        {% endif %}
+    </div>
+    <div class="hero-card">
+        {% if current_mode == "home" %}
+        <span>Workspace Status</span>
+        <strong>Ready for Review</strong>
+        <p>{{ batches|length }} active batch{% if batches|length != 1 %}es{% endif %} available</p>
+        {% elif current_mode == "records" %}
+        <span>Archive Status</span>
+        <strong>{{ batches|length }} Active Records</strong>
+        <p>Use search and filters to locate saved transcript batches faster.</p>
+        {% else %}
+        <span>Trash Bin Status</span>
+        <strong>{{ deleted_batches|length }} Deleted Record{% if deleted_batches|length != 1 %}s{% endif %}</strong>
+        <p>Deleted transcript batches remain recoverable until you decide otherwise.</p>
+        {% endif %}
+    </div>
+</section>
+
+{% if current_mode == "home" %}
+<section class="card access-card">
+    <div class="section-head">
+        <div>
+            <p class="eyebrow">Network Access</p>
+            <h2>Open GreggSpeak From Another Device</h2>
+        </div>
+    </div>
+    <div class="access-grid">
+        <div class="access-main">
+            <label for="primaryAccessUrl">Primary URL</label>
+            <div class="copy-row">
+                <input id="primaryAccessUrl" class="search-input" type="text" value="{{ primary_access_url }}" readonly>
+                <button class="btn primary small" type="button" data-copy-target="primaryAccessUrl">Copy Link</button>
+            </div>
+        </div>
+        <div class="qr-card">
+            <img src="{{ url_for('access_qr_png') }}" alt="QR code for {{ primary_access_url }}">
+            <span>Scan from a device connected to the same network.</span>
+        </div>
+    </div>
+</section>
+
+{% if latest_batch %}
+<section id="latest-batch" class="card latest-card">
+    <div class="section-head">
+        <div>
+            <p class="eyebrow">Latest Batch</p>
+            <h2>{{ latest_batch.title or "Untitled Batch" }}</h2>
+        </div>
+        <div class="action-row">
+            <a
+                class="btn primary"
+                href="{{ url_for('user_batch_detail', batch_id=latest_batch.batch_id) }}"
+                data-confirm-title="Open Workspace?"
+                data-confirm-message="Open this transcript batch for editing and TSN export?"
+                data-confirm-button="Open Workspace"
+            >Open Workspace</a>
+        </div>
+    </div>
+    <div class="meta-grid">
+        <div><span>Date</span><strong>{{ latest_batch.created_at }}</strong></div>
+        <div><span>Pages</span><strong>{{ latest_batch.total_pages }}</strong></div>
+        <div><span>Confidence</span><strong>{{ "%.2f"|format(latest_batch.confidence_avg or 0) }}</strong></div>
+        <div><span>Batch ID</span><strong>{{ latest_batch.batch_id }}</strong></div>
+    </div>
+</section>
+{% else %}
+<section id="saved-records" class="card">
+    <p class="empty-state">No transcript batches are available yet. Save one from the CTk app first.</p>
+</section>
+{% endif %}
+
+<section class="card dashboard-summary-card">
+    <div class="section-head">
+        <div>
+            <p class="eyebrow">Quick Summary</p>
+            <h2>Archive Snapshot</h2>
+        </div>
+    </div>
+    <div class="meta-grid">
+        <div><span>Active Records</span><strong>{{ batches|length }}</strong></div>
+        <div><span>Deleted Records</span><strong>{{ deleted_batches|length }}</strong></div>
+        <div><span>Latest Batch ID</span><strong>{{ latest_batch.batch_id if latest_batch else "Unavailable" }}</strong></div>
+        <div><span>Latest Title</span><strong>{{ latest_batch.title if latest_batch and latest_batch.title else "No saved transcript" }}</strong></div>
+    </div>
+    <div class="action-row">
+        <a class="btn primary" href="{{ url_for('records_page') }}">Open Records</a>
+        <a class="btn secondary" href="{{ url_for('trash_page') }}">Open Trash Bin</a>
+    </div>
+</section>
+{% endif %}
+
+{% if current_mode == "records" %}
+<section id="saved-records" class="card">
+    <div class="section-head section-head-stack">
+        <div>
+            <p class="eyebrow">Saved Records</p>
+            <h2>All Transcript Batches</h2>
+        </div>
+        <div class="toolbar">
+            <input id="batchSearch" class="search-input" type="search" placeholder="Search by title or batch ID">
+        </div>
+    </div>
+
+    {% if batches %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Batch ID</th>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>Pages</th>
+                    <th>Confidence</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="batchTableBody">
+                {% for batch in batches %}
+                <tr data-search="{{ (batch.batch_id ~ ' ' ~ (batch.title or ''))|lower }}">
+                    <td><span class="mono-text">{{ batch.batch_id }}</span></td>
+                    <td>{{ batch.title or "Untitled Batch" }}</td>
+                    <td>{{ batch.created_at }}</td>
+                    <td>{{ batch.total_pages }}</td>
+                    <td>{{ "%.2f"|format(batch.confidence_avg or 0) }}</td>
+                    <td>
+                        <span class="status-tag {% if (batch.upload_status or '') == 'processed' %}processed{% else %}pending{% endif %}">
+                            {{ batch.upload_status or "pending" }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-row">
+                            <a
+                                class="btn primary small"
+                                href="{{ url_for('user_batch_detail', batch_id=batch.batch_id) }}"
+                                data-confirm-title="Open Workspace?"
+                                data-confirm-message="Open this transcript batch for editing and TSN export?"
+                                data-confirm-button="Open"
+                            >Open</a>
+                            <form
+                                method="post"
+                                action="{{ url_for('unified_delete_batch', batch_id=batch.batch_id) }}"
+                                data-confirm-title="Delete Transcript?"
+                                data-confirm-message="Move this transcript batch to the trash bin?"
+                                data-confirm-button="Delete"
+                            >
+                                <button class="btn danger small" type="submit">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <p id="searchEmptyState" class="empty-state hidden">No batches match your search.</p>
+    {% else %}
+    <p class="empty-state">No active transcripts have been saved yet.</p>
+    {% endif %}
+</section>
+{% endif %}
+
+{% if current_mode == "trash" %}
+<section id="trash-bin" class="card">
+    <div class="section-head">
+        <div>
+            <p class="eyebrow">Trash Bin</p>
+            <h2>Deleted Transcripts</h2>
+        </div>
+        <span class="toolbar-count">{{ deleted_batches|length }} deleted</span>
+    </div>
+
+    {% if deleted_batches %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Batch ID</th>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>Pages</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for batch in deleted_batches %}
+                <tr>
+                    <td><span class="mono-text">{{ batch.batch_id }}</span></td>
+                    <td>{{ batch.title or "Untitled Batch" }}</td>
+                    <td>{{ batch.created_at }}</td>
+                    <td>{{ batch.total_pages }}</td>
+                    <td><span class="status-tag deleted">deleted</span></td>
+                    <td>
+                        <div class="action-row">
+                            <form
+                                method="post"
+                                action="{{ url_for('unified_restore_batch', batch_id=batch.batch_id) }}"
+                                data-confirm-title="Restore Transcript?"
+                                data-confirm-message="Restore this transcript batch from the trash bin?"
+                                data-confirm-button="Restore"
+                            >
+                                <button class="btn secondary small" type="submit">Restore</button>
+                            </form>
+                            <form
+                                method="post"
+                                action="{{ url_for('unified_purge_batch', batch_id=batch.batch_id) }}"
+                                data-confirm-title="Delete Permanently?"
+                                data-confirm-message="This will permanently remove the transcript batch and its pages from the database. This action cannot be undone."
+                                data-confirm-button="Delete Permanently"
+                            >
+                                <button class="btn danger small" type="submit">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty-state">Trash bin is empty.</p>
+    {% endif %}
+</section>
+{% endif %}
+
+<script>
+const batchSearchInput = document.getElementById("batchSearch");
+const batchRows = Array.from(document.querySelectorAll("#batchTableBody tr"));
+const searchEmptyState = document.getElementById("searchEmptyState");
+
+if (batchSearchInput) {
+    batchSearchInput.addEventListener("input", function () {
+        const query = this.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        batchRows.forEach((row) => {
+            const matches = row.dataset.search.includes(query);
+            row.style.display = matches ? "" : "none";
+            if (matches) {
+                visibleCount += 1;
+            }
+        });
+
+        if (searchEmptyState) {
+            searchEmptyState.classList.toggle("hidden", visibleCount !== 0);
+        }
+    });
+}
+</script>
+{% endblock %}

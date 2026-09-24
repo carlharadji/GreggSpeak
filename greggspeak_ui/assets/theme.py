@@ -1,0 +1,8 @@
+BG_COLOR = "#12365a"
+CARD_COLOR = "#1f527e"
+PRIMARY = "#3568dc"
+ACCENT = "#d8bb67"
+TEXT = "#ffffff"
+SUBTEXT = "#d2deec"
+SUCCESS = "#38cfa3"
+WARNING = "#f5b84b"
