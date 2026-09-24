@@ -93,7 +93,7 @@ present a universal recognition-accuracy figure.
 
 ## Thesis team and contribution
 
-**Carl Eugene S. Haradji served as Software Development Lead.** He led software
+**Carl Eugene S. Haradji served as Software Development Lead.** Who led the software
 development, developed or integrated major software components, contributed to
 the computer-vision and recognition pipeline, and integrated application
 components. The team worked together on system-level implementation, testing,
