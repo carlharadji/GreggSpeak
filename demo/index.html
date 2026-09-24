@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="GreggSpeak transcript review interface.">
+    <title>GreggSpeak Web</title>
+    <link rel="icon" type="image/svg+xml" href="./assets/gs-logo.svg">
+    <!-- Exact copy of the real GreggSpeak web application's stylesheet. -->
+    <link rel="stylesheet" href="./styles.css?v=source-ui-20260924">
+    <link rel="stylesheet" href="./demo.css?v=source-ui-20260924c">
+    <script src="./mock-data.js?v=source-ui-20260924e" defer></script>
+    <script src="./app.js?v=source-ui-20260924f" defer></script>
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand-wrap" href="#home" aria-label="GreggSpeak home">
+            <div class="brand-row">
+                <img class="brand-logo" src="./assets/gs-logo.svg" alt="" aria-hidden="true">
+                <div class="brand-lockup">
+                    <span class="brand-mark">GREGG</span><span class="brand-name">SPEAK</span>
+                </div>
+            </div>
+            <span class="brand-subtitle">Vision-Based Translator and Reader for Gregg Shorthand</span>
+        </a>
+
+        <button id="mobileMenuButton" class="mobile-menu-button" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="primaryNav">
+            <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+        </button>
+
+        <nav id="primaryNav" class="navlinks" aria-label="Primary navigation">
+            <a class="navlink" href="#home" data-nav="home">Home</a>
+            <a class="navlink" href="#records" data-nav="records">Records</a>
+            <a class="navlink" href="#trash" data-nav="trash">Trash</a>
+        </nav>
+
+        <div class="topbar-tools">
+            <div class="profile-menu">
+                <button id="profileMenuButton" class="profile-button" type="button" aria-label="Account options" aria-haspopup="true" aria-expanded="false" aria-controls="profileMenuList">
+                    <span class="profile-avatar">G</span>
+                </button>
+                <div id="profileMenuList" class="profile-dropdown hidden" role="menu">
+                    <button id="resetDemoButton" class="profile-link danger-link demo-profile-action" type="button" role="menuitem">Reset Data</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        <div id="app"></div>
+    </main>
+
+    <div id="confirmModal" class="confirm-modal hidden" aria-hidden="true">
+        <div class="confirm-backdrop" data-confirm-close></div>
+        <div class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+            <p class="eyebrow">Confirmation</p>
+            <h2 id="confirmTitle">Are you sure?</h2>
+            <p id="confirmMessage" class="subtle">Please confirm this action.</p>
+            <div class="confirm-actions">
+                <button id="confirmSubmitButton" class="btn danger" type="button">Confirm</button>
+                <button id="confirmCancelButton" class="btn secondary" type="button">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <div id="demoToast" class="demo-toast hidden" role="status" aria-live="polite"></div>
+</body>
+</html>

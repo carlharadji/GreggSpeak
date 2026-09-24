@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 880" role="img" aria-labelledby="title desc">
+  <title id="title">Synthetic segmentation review illustration</title>
+  <desc id="desc">Invented page layout with sample row and word boxes. No actual scan or OpenCV output.</desc>
+  <rect width="680" height="880" fill="#e9edf0"/>
+  <rect x="68" y="38" width="544" height="802" rx="5" fill="#fffaf0" stroke="#bcc8d2" stroke-width="2"/>
+  <text x="558" y="82" text-anchor="end" font-family="Arial,sans-serif" font-size="13" fill="#8c9aa4">1</text>
+  <g fill="none" stroke="#2d88ca" stroke-width="3" stroke-dasharray="7 6">
+    <rect x="98" y="128" width="478" height="61" rx="5"/><rect x="98" y="213" width="478" height="61" rx="5"/>
+    <rect x="98" y="298" width="478" height="61" rx="5"/><rect x="98" y="383" width="478" height="61" rx="5"/>
+    <rect x="98" y="468" width="478" height="61" rx="5"/><rect x="98" y="553" width="478" height="61" rx="5"/>
+    <rect x="98" y="638" width="478" height="61" rx="5"/><rect x="98" y="723" width="478" height="61" rx="5"/>
+  </g>
+  <g fill="rgba(245,184,56,.12)" stroke="#c69016" stroke-width="2">
+    <rect x="110" y="137" width="104" height="44" rx="3"/><rect x="228" y="137" width="112" height="44" rx="3"/><rect x="354" y="137" width="124" height="44" rx="3"/>
+    <rect x="110" y="222" width="142" height="44" rx="3"/><rect x="266" y="222" width="96" height="44" rx="3"/><rect x="376" y="222" width="119" height="44" rx="3"/>
+    <rect x="110" y="307" width="103" height="44" rx="3"/><rect x="227" y="307" width="130" height="44" rx="3"/><rect x="370" y="307" width="112" height="44" rx="3"/>
+    <rect x="110" y="392" width="144" height="44" rx="3"/><rect x="267" y="392" width="110" height="44" rx="3"/><rect x="391" y="392" width="99" height="44" rx="3"/>
+  </g>
+</svg>

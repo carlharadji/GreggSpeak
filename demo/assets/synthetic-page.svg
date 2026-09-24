@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 880" role="img" aria-labelledby="title desc">
+  <title id="title">Synthetic shorthand-style page illustration</title>
+  <desc id="desc">Decorative invented strokes on ruled paper. This is not a real scanned page or training sample.</desc>
+  <rect width="680" height="880" fill="#e9edf0"/>
+  <rect x="68" y="38" width="544" height="802" rx="5" fill="#fffaf0" stroke="#bcc8d2" stroke-width="2"/>
+  <text x="558" y="82" text-anchor="end" font-family="Arial,sans-serif" font-size="13" fill="#8c9aa4">1</text>
+  <g stroke="#d6e1e8" stroke-width="2">
+    <path d="M95 165H585 M95 250H585 M95 335H585 M95 420H585 M95 505H585 M95 590H585 M95 675H585 M95 760H585"/>
+  </g>
+  <g fill="none" stroke="#304f68" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity=".86">
+    <path d="M110 151c20-26 42 25 62 0s34-4 45 8m28-9q22-25 40 5t39-2m37-6q18-22 42 8t42-7"/>
+    <path d="M110 238q21-32 49 2t47-4m31-2q15-23 32 4t36 0m26-7q18-23 41 4t44-5"/>
+    <path d="M110 321q23-27 48 5t43-2m29-7q14-16 31 9t39-1m31-11q24-18 45 9t39-4"/>
+    <path d="M110 407q19-20 39 5t43-2m33-7q22-29 45 7t43-5m26-4q19-20 38 8t42-5"/>
+    <path d="M110 493q24-25 45 8t43-7m28-5q15-17 35 8t39-3m30-9q20-16 42 10t42-7"/>
+    <path d="M110 578q23-26 46 7t45-5m32-7q18-22 37 10t39-7m31-3q18-23 42 8t42-6"/>
+    <path d="M110 661q20-20 42 8t45-5m32-7q19-24 38 7t41-5m31-4q18-21 41 9t42-7"/>
+    <path d="M110 746q22-24 47 6t44-4m31-5q20-22 40 8t39-4m28-8q21-18 40 10t43-4"/>
+  </g>
+</svg>

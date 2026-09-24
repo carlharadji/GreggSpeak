@@ -119,6 +119,18 @@ show example content and network details.
 **Full GreggSpeak system demonstration video coming soon.** The video will be
 hosted separately once an approved public link is available.
 
+## Live interface demo
+
+**[Explore the GreggSpeak web interface](https://carlharadji.github.io/GreggSpeak/)**
+
+The separate [frontend demo](demo/) reproduces the web review workflow in a
+static browser interface. Its first record pairs one team-cleared test scan
+with the matching saved segmentation overlay and historical recognition text;
+the other record is fictional. It includes page-level editing, confidence
+values, and TSN review fields. No recognition runs in the browser, and it does
+not connect to the model, database, or hardware. Edits are stored only in the
+visitor's browser.
+
 ## Repository layout
 
 | Path | Purpose |
@@ -132,6 +144,7 @@ hosted separately once an approved public link is available.
 | `tools/` | Reviewed preprocessing and segmentation utilities |
 | `models/*labels*.txt` | Class mappings for reference; weights are excluded |
 | `assets/GreggSpeak-Brochure.pdf` | Team brochure and operating overview |
+| `demo/` | Standalone static interface with one cleared test scan and a fictional record |
 
 Private `datasets/`, runtime `data/`, model binaries, research reports,
 transcripts, browser profiles, and historical deployment archives are ignored
@@ -169,15 +182,17 @@ alone because the underlying images are withheld.
 
 ## Project visuals
 
-Screenshots are intentionally omitted until interface captures with **wholly
-synthetic text** and approved branding are reviewed. Captures from the local
-database, court materials, or research participants are not suitable examples.
+Interface screenshots are intentionally omitted until separately reviewed.
+The frontend demo contains one specifically cleared test scan and its saved
+recognition result. This clearance does not apply to other local captures,
+court materials, or research participants.
 
 ## Dataset and model availability
 
 This repository includes training, evaluation, preprocessing, and inference
-source plus reviewed label mappings. It does **not** include raw or augmented
-shorthand datasets, captured pages, trained `.keras`/`.tflite`/`.h5` weights, or
+source plus reviewed label mappings. Apart from the single cleared test scan and
+overlay in `demo/assets/`, it does **not** include raw or augmented shorthand
+datasets, captured pages, trained `.keras`/`.tflite`/`.h5` weights, or
 checkpoints. These materials need separate privacy, provenance, academic-use,
 and redistribution clearance. There is currently no approved public model or
 dataset download; Git LFS and GitHub Releases would not change those rights.
@@ -187,11 +202,13 @@ dataset download; Git LFS and GitHub Releases would not change those rights.
 The local research workspace contains handwritten shorthand, dictionary-derived
 references, camera captures, transcripts, and evaluation material associated
 with an academic setting and partner court. Those materials, along with SQLite
-records and trained weights, are excluded pending privacy, provenance, and
-redistribution review. A public privacy statement does not grant permission to
-redistribute them. The team has approved public display of this source
-repository, but has not selected a reuse license. No open-source license is
-asserted here.
+records and trained weights, remain excluded pending privacy, provenance, and
+redistribution review. The team has specifically cleared the one test scan,
+its overlay, and the corresponding saved recognition text used by the frontend
+demo; that approval does not cover the broader dataset. A public privacy
+statement does not grant permission to redistribute other materials. The team
+has approved public display of this source repository, but has not selected a
+reuse license. No open-source license is asserted here.
 
 GreggSpeak was developed as a Computer Engineering thesis project during
 **2025–2026**. This source repository was prepared for public portfolio release

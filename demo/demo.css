@@ -1,0 +1,9 @@
+/* Demo-only additions. All application colors and layouts come from styles.css. */
+.demo-profile-action { width: 100%; border: 0; background: transparent; text-align: left; font: inherit; cursor: pointer; }
+.demo-muted-action { opacity: .65; cursor: not-allowed; }
+.demo-muted-action:hover { transform: none; }
+.demo-qr-placeholder { width: 164px; height: 164px; display: grid; place-items: center; border: 5px solid #fff; border-radius: 6px; background: #e8eef2; color: #1d3f5d; font-size: 1.1rem; font-weight: 800; letter-spacing: .12em; }
+.demo-page-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+.demo-page-nav a { border: 1px solid rgba(201,168,93,.25); border-radius: 9px; padding: 8px 12px; background: rgba(8,21,33,.55); }
+.demo-page-nav a.active { border-color: var(--accent); color: var(--accent); }
+.demo-toast { position: fixed; right: 20px; bottom: 20px; z-index: 30; padding: 12px 16px; max-width: 360px; border: 1px solid var(--accent); border-radius: 10px; background: #0b1e2d; color: var(--text); box-shadow: 0 12px 32px rgba(0,0,0,.35); }
