@@ -112,10 +112,9 @@ Thesis adviser: **Asil Kastle S. Dela Cruz, PCpE, MIT**.
 
 ## Project brochure and demonstration
 
-The team brochure illustrates the device, hardware, LCD operation, and web
-workflow. Its current PDF includes an embedded application screenshot with
-contact and research-record details, so it is withheld from this public source
-release pending a properly sanitized edition.
+The [GreggSpeak project brochure](assets/GreggSpeak-Brochure.pdf) illustrates the
+device, hardware, LCD operation, and web workflow. Its application screenshots
+show example content and network details.
 
 **Full GreggSpeak system demonstration video coming soon.** The video will be
 hosted separately once an approved public link is available.
@@ -132,6 +131,7 @@ hosted separately once an approved public link is available.
 | `run_*testing*.py`, `evaluate_v1.py` | Evaluation entry points |
 | `tools/` | Reviewed preprocessing and segmentation utilities |
 | `models/*labels*.txt` | Class mappings for reference; weights are excluded |
+| `assets/GreggSpeak-Brochure.pdf` | Team brochure and operating overview |
 
 Private `datasets/`, runtime `data/`, model binaries, research reports,
 transcripts, browser profiles, and historical deployment archives are ignored
